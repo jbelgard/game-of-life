@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useRef } from "react";
 import produce from "immer";
-
 import "./App.css";
 
 const numRows = 25;
@@ -29,6 +28,7 @@ const emptyGrid = () => {
 
 function App() {
   const [running, setRunning] = useState(false);
+  const [speed, setSpeed] = useState(1000);
   const[grid, setGrid] = useState(() => {
     return emptyGrid();
   });
@@ -74,7 +74,7 @@ function App() {
         }
       });
     });
-    setTimeout(runGame, 250);
+    setTimeout(runGame, speed);
   }, []);
   
   return (
@@ -111,6 +111,16 @@ function App() {
         )}
       </div>
       <div class="button-container">
+        <button
+          onClick={() => {
+            if (speed <= 5000) {
+              setSpeed(speed + 100);
+              console.log(speed);
+            }
+          }}
+        >
+          <i class="fas fa-backward" />
+        </button>
             {/* changes the sate to determine if it's running or not */}
         <button
           onClick={() => {
@@ -122,6 +132,16 @@ function App() {
           }}        
         >
           {running ? <i class="fas fa-pause" /> : <i class="fas fa-play" />}
+        </button>
+        <button
+          onClick={() => {
+            if (speed >= 100) {
+              setSpeed(speed - 100);
+              console.log(speed);
+            }
+          }}
+        >
+          <i class="fas fa-fast-forward" />
         </button>
         <button
           onClick={() => {
@@ -145,6 +165,26 @@ function App() {
         >
           <i class="fas fa-question" />
         </button>
+      </div>
+      <div class="description">
+        <div>
+          <h2>Description on what's going on</h2>
+          <ul>
+            <li>Rule 1: Any live cell with 2 or 3 live neighbors survives.</li>
+            <li>Rule 2: Any dead cell with 3 live neighbors comes back to life.</li>
+            <li>Rule 3: All other live cells die in the next generation.  Similarly, all other dead cells stay dead.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="description">
+        <div>
+          <h2>Instructions</h2>
+          <ul>
+            <li> Click on any cell to make it "alive"</li>
+            <li>Click play to see how it all plays out</li>
+            <li>Change the speed, and even create a random simulation using the buttons.</li>
+          </ul>
+        </div>
       </div>
     </div>
   );
