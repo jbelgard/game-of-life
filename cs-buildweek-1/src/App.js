@@ -3,8 +3,8 @@ import produce from "immer";
 
 import "./App.css";
 
-const numRows = 50;
-const numColumns = 50;
+const numRows = 25;
+const numColumns = 25;
 
 //to check neighbors across the grid
 const neighborOps = [
@@ -74,72 +74,79 @@ function App() {
         }
       });
     });
-    setTimeout(runGame, 8000);
+    setTimeout(runGame, 250);
   }, []);
   
   return (
-    <>
-      {/* changes the state to if the game is running or not */}
-      <button
-        onClick={() => {
-          setRunning(!running);
-          if (!running) {
-            runningRef.current = true;
-            runGame();
-          }
+    <div class="page-container">
+      <h1>Conway's Game of Life</h1>
+      <h3>by Jason Belgard</h3>
+      <div
+        class="grid-display"
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${numColumns}, 20px`,
         }}
+      >
+        {/* this creates the grid by mapping over our rows. i is the index of the rows and c is the index for the columns */}
+        {grid.map((rows, i) => 
+        rows.map((col, c) => (
+          <div
+            key={`${i}-${c}`}
+            //this sets the index of the clicked grid to alive
+            onClick={() => {
+              const newGrid = produce(grid, (gridCopy) => {
+                gridCopy[i][c] = grid[i][c] ? 0 : 1;
+              });
+              setGrid(newGrid);
+            }}
+            style={{
+              width: 20,
+              height: 20,
+              backgroundColor: grid[i][c] ? "black" : undefined,
+              border: "solid 1px black",
+            }}
+          />
+        ))
+        )}
+      </div>
+      <div class="button-container">
+            {/* changes the sate to determine if it's running or not */}
+        <button
+          onClick={() => {
+            setRunning(!running);
+            if (!running) {
+              runningRef.current = true;
+              runGame();
+            }
+          }}        
         >
-          {running ? "Stop" : "Start"}
+          {running ? <i class="fas fa-pause" /> : <i class="fas fa-play" />}
         </button>
         <button
           onClick={() => {
             setGrid(emptyGrid());
           }}
         >
-          Clear
+          <i class="fas fa-redo" />
         </button>
         <button
           onClick={() => {
             const rows = [];
             for (let i = 0; i < numRows; i++) {
               rows.push(
-                Array.from(Array(numColumns), () => (Math.random() > 0.8 ? 1 : 0))
+                Array.from(Array(numColumns), () => 
+                  Math.random() > 0.8 ? 1 : 0
+                )
               );
             }
             setGrid(rows);
           }}
         >
-          Random
+          <i class="fas fa-question" />
         </button>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${numColumns}, 20px`,
-          }}
-        >
-          {/* this creates the grid by mapping over our rows and uses i as the index of the rows, and c as the index of the columns */}
-          {grid.map((rows, i) =>
-            rows.map((col, c) => (
-              <div 
-                key={`${i}-${c}`}
-                //sets the index of the clicked grid to alive
-                onClick={() => {
-                  const newGrid = produce(grid, (gridCopy) => {
-                    gridCopy[i][c] = grid[i][c] ? 0 : 1;
-                  });
-                  setGrid(newGrid);
-                }}
-                style={{
-                  width: 20,
-                  height: 20,
-                  backgroundColor: grid[i][c] ? "brown" : undefined,
-                  border: "solid 1px black",
-                }}
-              />
-            ))
-          )}
-        </div>
-      </>
+      </div>
+    </div>
   );
 }
 
