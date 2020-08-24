@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { mediumClear } from './mediumClear';
 import { mediumFirst } from './mediumFirst';
 import { mediumSecond } from './mediumSecond';
@@ -11,7 +11,7 @@ let firstMatrix = mediumFirst;
 let secondMatrix = mediumSecond;
 let generationCount = 1;
 
-class Game extends Component {
+class Game extends React.Component {
 
   constructor(props) {
     super(props);
@@ -22,9 +22,9 @@ class Game extends Component {
       buttonTag: 'Start',
       speed: 200,
       boardSize: 'medium',
-      numX: 50,
-      numY: 50,
-      cellSize: 15,
+      numX: 25,
+      numY: 25,
+      cellSize: 20,
       configuration: ''
     }
   }
@@ -34,7 +34,7 @@ class Game extends Component {
   }
 
   componentDidUpdate = () => {
-    if (!this.state.continueAnimating) {
+    if (this.state.continueAnimating) {
       this.toggleSquares();
     }
   }
@@ -46,232 +46,234 @@ class Game extends Component {
   drawBoard = () => {
     let canvas = this.refs.canvas;
     let context = canvas.getContext('2d');
+
     for (let x = 0.5; x < this.state.numX * this.state.cellSize + 1; x += this.state.cellSize) {
-      context.moveTo(x, 0);
-      context.lineTo(x, (this.state.numX + 1) * this.state.cellSize);
+        context.moveTo(x, 0);
+        context.lineTo(x, (this.state.numX +1) * this.state.cellSize);
     }
+
     for (let y = 0.5; y < (this.state.numY + 1) * this.state.cellSize; y += this.state.cellSize) {
-      context.moveTo(0, y);
-      context.lineTo((this.state.numX + 1) * this.state.cellSize, y);
+        context.moveTo(0, y);
+        context.lineTo((this.state.numX +1) * this.state.cellSize, y);
     }
+
     context.strokeStyle = "#000";
     context.stroke();
-  }
 
-  toggleSquares = () => {
-    const canvas = this.refs.canvas;
-    const context = canvas.getContext('2d');
-    for (let i = 0; i < this.state.numY; i++) {
+}
+
+toggleSquares = () => {
+  const canvas = this.refs.canvas;
+  const context = canvas.getContext('2d');
+  for (let i = 0; i < this.state.numY; i++) {
       for (let j = 0; j <= this.state.numX; j++) {
-        if (this.state.array1[i][j]) {
-          context.fillStyle = "cyan";
-          context.fillRect(j * this.state.cellSize + 1, i * this.state.cellSize + 1, this.state.cellSize - 1, this.state.cellSize - 1);
-        } else {
-          context.fillStyle = "white";
-          context.fillRect(j * this.state.cellSize + 1, i * this.state.cellSize + 1, this.state.cellSize - 1, this.state.cellSize - 1);
-        }
-      }
-    }
-  }
-
-  onAnimFrame = (timestamp) => {
-    if (this.state.cycle === 'A') {
-      if (this.state.continueAnimating === true) {
-        myReq = requestAnimationFrame((timestamp) => { myInt = setTimeout(() => { this.onAnimFrame(timestamp) }, this.state.speed) });
-
-        const canvas = this.refs.canvas;
-        const context = canvas.getContext('2d');
-        for (let i = 0; i < this.state.numY; i++) {
-          for (let j = 0; j <= this.state.numX; j++) {
-            if (this.state.array1[i][j]) {
-              context.fillStyle = "cyan";
-              context.fillRect(j * this.state.cellSize + 1, i * this.state.cellSize + 1, this.state.cellSize - 1, this.state.cellSize - 1);
-            } else {
-              context.fillStyle = "lightgray";
-              context.fillRect(j * this.state.cellSize + 1, i * this.state.cellSize + 1, this.state.cellSize - 1, this.state.cellSize - 1);
-            }
-          }
-        }
-        //set the following buffer
-        for (let i = 0; i < this.state.numY; i++) {
-          for (let j = 0; j <= this.state.numX; j++) {
-            //wrap around
-            let prevRow = i - 1;
-            if (prevRow === -1) {
-              prevRow = this.state.numY - 1;
-            }
-            let nextRow = i + 1;
-            if (nextRow === this.state.numY) {
-              nextRow = 0;
-            }
-            let prevCol = j - 1;
-            if (prevCol === -1) {
-              prevCol = this.state.numX - 1;
-            }
-            let nextCol = j + 1;
-            if (nextCol === this.state.numX) {
-              nextCol = 0;
-            }
-
-            //count living neighbors
-            let count = 0;
-            if (firstMatrix[prevRow][prevCol]) {
-              count++;
-            }
-            if (firstMatrix[prevRow][j]) {
-              count++;
-            }
-            if (firstMatrix[prevRow][nextCol]) {
-              count++;
-            }
-            if (firstMatrix[i][prevCol]) {
-              count++;
-            }
-            if (firstMatrix[i][nextCol]) {
-              count++;
-            }
-            if (firstMatrix[nextRow][prevCol]) {
-              count++;
-            }
-            if (firstMatrix[nextRow][j]) {
-              count ++;
-            }
-            if (firstMatrix[nextRow][nextCol]) {
-              count++;
-            }
-
-            //toggle state based on neighbors
-            if ((firstMatrix[i][j] === 1) && (count < 2)) {
-              secondMatrix[i][j] = 0;
-              console.log(firstMatrix[i][j], count);
-            } else if ((firstMatrix[i][j] === 1) && (count === 2 || count === 3)) {
-              secondMatrix[i][j] = 1;
-              console.log(firstMatrix[i][j], count);
-            } else if ((firstMatrix[i][j] === 1) && (count > 3)) {
-              secondMatrix[i][j] = 0;
-              console.log(firstMatrix[i][j], count);
-            } else if ((firstMatrix[i][j] === 0) && (count === 3)) {
-              secondMatrix[i][j] = 1;
-              console.log(firstMatrix[i][j], count);
-            } else if ((firstMatrix[i][j] === 0) && (count !== 3)) {
-              secondMatrix[i][j] = 0;
-            }
-          }
-        }
-        this.setState({ array1: secondMatrix });
-        this.setState({ cycle: 'B' });
-        generationCount++;
-      } else {
-        cancelAnimationFrame(myReq);
-      }
-    } else {
-      if (this.state.continueAnimating === true) {
-        myReq = requestAnimationFrame((timestamp) => { myInt = setTimeout(() => { this.onAnimFrame(timestamp) }, this.state.speed) });
-
-        const canvas = this.refs.canvas;
-        const context = canvas.getContext('2d');
-        for (let i = 0; i < this.state.numY; i++) {
-          for (let j = 0; j <= this.state.numX; j++) {
-            if (this.state.array1[i][j]) {
-              context.fillStyle = "cyan";
+          if (this.state.array1[i][j]) {
+              context.fillStyle = "forestgreen";
               context.fillRect(j * this.state.cellSize + 1, i * this.state.cellSize + 1, this.state.cellSize-1, this.state.cellSize-1);
-            } else {
+          } else {
               context.fillStyle = "lightgray";
               context.fillRect(j * this.state.cellSize + 1, i * this.state.cellSize + 1, this.state.cellSize-1, this.state.cellSize-1);
-            }
           }
-        }
-
-        // set the next buffer
-        for (let i = 0; i < this.state.numY; i++) {
-          for (let j = 0; j <= this.state.numX; j++) {
-            // wrap around
-            let prevRow = i - 1;
-            if (prevRow === -1) {
-                prevRow = this.state.numY - 1;
-            }
-            let nextRow = i + 1;
-            if (nextRow === this.state.numY) {
-                nextRow = 0
-            }
-            let prevCol = j - 1;
-            if (prevCol === -1) {
-                prevCol = this.state.numX - 1;
-            }
-            let nextCol = j + 1;
-            if (nextCol === this.state.numX) {
-                nextCol = 0;
-            }
-
-            // count living neighbors
-            let count = 0;
-            if (secondMatrix[prevRow][prevCol]) {
-                count++;
-            }
-            if (secondMatrix[prevRow][j]) {
-                count++;
-            }
-            if (secondMatrix[prevRow][nextCol]) {
-                count++;
-            }
-            if (secondMatrix[i][prevCol]) {
-                count++;
-            }
-            if (secondMatrix[i][nextCol]) {
-                count++;
-            }
-            if (secondMatrix[nextRow][prevCol]) {
-                count++;
-            }
-            if (secondMatrix[nextRow][j]) {
-                count++;
-            }
-            if (secondMatrix[nextRow][nextCol]) {
-                count++;
-            }
-
-            //toggle state based on neighbors
-            if ((secondMatrix[i][j] === 1) && (count < 2)) {
-              firstMatrix[i][j] = 0;
-              console.log(secondMatrix[i][j], count);
-            } else if ((secondMatrix[i][j] === 1) && (count === 2 || count === 3)) {
-              firstMatrix[i][j] = 1;
-              console.log(secondMatrix[i][j], count);
-            } else if ((secondMatrix[i][j] === 1) && (count > 3)) {
-              firstMatrix[i][j] = 0;
-              console.log(secondMatrix[i][j], count);
-            } else if ((secondMatrix[i][j] === 0) && (count === 3)) {
-              firstMatrix[i][j] = 1;
-              console.log(secondMatrix[i][j], count);
-            } else if ((secondMatrix[i][j] === 0) && (count !== 3)) {
-              firstMatrix[i][j] = 0;
-            }
-          }
-        }
-        this.setState({ array1: firstMatrix });
-        this.setState({ cycle: 'A' });
-        generationCount++
-      } else {
-        cancelAnimationFrame(myReq);
       }
-    }
   }
+}
 
-  toggleButton = () => {
-    if (this.state.continueAnimating === true) {
-      this.setState({ continueAnimating: false });
+onAnimFrame = (timestamp) => {
+  if (this.state.cycle === 'A') {
+      if (this.state.continueAnimating === true) {
+          myReq = requestAnimationFrame((timestamp) => {myInt = setTimeout(() => {this.onAnimFrame(timestamp)}, this.state.speed)});
+
+          const canvas = this.refs.canvas;
+          const context = canvas.getContext('2d');
+          for (let i = 0; i < this.state.numY; i++) {
+              for (let j = 0; j <= this.state.numX; j++) {
+                  if (this.state.array1[i][j]) {
+                      context.fillStyle = "forestgreen";
+                      context.fillRect(j * this.state.cellSize + 1, i * this.state.cellSize + 1, this.state.cellSize-1, this.state.cellSize-1);
+                  } else {
+                      context.fillStyle = "lightgray";
+                      context.fillRect(j * this.state.cellSize + 1, i * this.state.cellSize + 1, this.state.cellSize-1, this.state.cellSize-1);
+                  }
+              }
+          }
+          // set the next buffer
+          for (let i = 0; i < this.state.numY; i++) {
+              for (let j = 0; j <= this.state.numX; j++) {
+                  // wrap around
+                  let prevRow = i - 1;
+                  if (prevRow === -1) {
+                      prevRow = this.state.numY - 1;
+                  }
+                  let nextRow = i + 1;
+                  if (nextRow === this.state.numY) {
+                      nextRow = 0
+                  }
+                  let prevCol = j - 1;
+                  if (prevCol === -1) {
+                      prevCol = this.state.numX - 1;
+                  }
+                  let nextCol = j + 1;
+                  if (nextCol === this.state.numX) {
+                      nextCol = 0;
+                  }
+
+                  // count living neighbors
+                  let count = 0;
+                  if (firstMatrix[prevRow][prevCol]) {
+                      count++;
+                  }
+                  if (firstMatrix[prevRow][j]) {
+                      count++;
+                  }
+                  if (firstMatrix[prevRow][nextCol]) {
+                      count++;
+                  }
+                  if (firstMatrix[i][prevCol]) {
+                      count++;
+                  }
+                  if (firstMatrix[i][nextCol]) {
+                      count++;
+                  }
+                  if (firstMatrix[nextRow][prevCol]) {
+                      count++;
+                  }
+                  if (firstMatrix[nextRow][j]) {
+                      count++;
+                  }
+                  if (firstMatrix[nextRow][nextCol]) {
+                      count++;
+                  }
+
+                  // toggle state based on neighbors
+                  if ((firstMatrix[i][j] === 1) && (count < 2)) {
+                      secondMatrix[i][j] = 0;
+                      console.log(firstMatrix[i][j], count);
+                  } else if ((firstMatrix[i][j] === 1) && (count === 2 || count === 3)) {
+                      secondMatrix[i][j] = 1;
+                      console.log(firstMatrix[i][j], count);
+                  } else if ((firstMatrix[i][j] === 1) && (count > 3)) {
+                      secondMatrix[i][j] = 0;
+                      console.log(firstMatrix[i][j], count);
+                  } else if ((firstMatrix[i][j] === 0) && (count === 3)) {
+                      secondMatrix[i][j] = 1;
+                      console.log(firstMatrix[i][j], count);
+                  } else if ((firstMatrix[i][j] === 0) && (count !== 3)) {
+                      secondMatrix[i][j] = 0;
+                  }
+              }
+          }
+          this.setState({array1: secondMatrix});
+          this.setState({cycle: 'B'});
+          generationCount++;
+      } else {
+          cancelAnimationFrame(myReq);
+      }
+  } else {
+      if (this.state.continueAnimating === true) {
+          myReq = requestAnimationFrame((timestamp) => {myInt = setTimeout(() => {this.onAnimFrame(timestamp)}, this.state.speed)});
+
+          const canvas = this.refs.canvas;
+          const context = canvas.getContext('2d');
+          for (let i = 0; i < this.state.numY; i++) {
+              for (let j = 0; j <= this.state.numX; j++) {
+                  if (this.state.array1[i][j]) {
+                      context.fillStyle = "forestgreen";
+                      context.fillRect(j * this.state.cellSize + 1, i * this.state.cellSize + 1, this.state.cellSize-1, this.state.cellSize-1);
+                  } else {
+                      context.fillStyle = "lightgray";
+                      context.fillRect(j * this.state.cellSize + 1, i * this.state.cellSize + 1, this.state.cellSize-1, this.state.cellSize-1);
+                  }
+              }
+          }
+          // set the next buffer
+          for (let i = 0; i < this.state.numY; i++) {
+              for (let j = 0; j <= this.state.numX; j++) {
+                  // wrap around
+                  let prevRow = i - 1;
+                  if (prevRow === -1) {
+                      prevRow = this.state.numY - 1;
+                  }
+                  let nextRow = i + 1;
+                  if (nextRow === this.state.numY) {
+                      nextRow = 0
+                  }
+                  let prevCol = j - 1;
+                  if (prevCol === -1) {
+                      prevCol = this.state.numX - 1;
+                  }
+                  let nextCol = j + 1;
+                  if (nextCol === this.state.numX) {
+                      nextCol = 0;
+                  }
+
+                  // count living neighbors
+                  let count = 0;
+                  if (secondMatrix[prevRow][prevCol]) {
+                      count++;
+                  }
+                  if (secondMatrix[prevRow][j]) {
+                      count++;
+                  }
+                  if (secondMatrix[prevRow][nextCol]) {
+                      count++;
+                  }
+                  if (secondMatrix[i][prevCol]) {
+                      count++;
+                  }
+                  if (secondMatrix[i][nextCol]) {
+                      count++;
+                  }
+                  if (secondMatrix[nextRow][prevCol]) {
+                      count++;
+                  }
+                  if (secondMatrix[nextRow][j]) {
+                      count++;
+                  }
+                  if (secondMatrix[nextRow][nextCol]) {
+                      count++;
+                  }
+
+                  // toggle state based on neighbors
+                  if ((secondMatrix[i][j] === 1) && (count < 2)) {
+                      firstMatrix[i][j] = 0;
+                      console.log(secondMatrix[i][j], count);
+                  } else if ((secondMatrix[i][j] === 1) && (count === 2 || count === 3)) {
+                      firstMatrix[i][j] = 1;
+                      console.log(secondMatrix[i][j], count);
+                  } else if ((secondMatrix[i][j] === 1) && (count > 3)) {
+                      firstMatrix[i][j] = 0;
+                      console.log(secondMatrix[i][j], count);
+                  } else if ((secondMatrix[i][j] === 0) && (count === 3)) {
+                      firstMatrix[i][j] = 1;
+                      console.log(secondMatrix[i][j], count);
+                  } else if ((secondMatrix[i][j] === 0) && (count !== 3)) {
+                      firstMatrix[i][j] = 0;
+                  }
+              }
+          }
+          this.setState({array1: firstMatrix});
+          this.setState({cycle: 'A'});
+          generationCount++;
+      } else {
+          cancelAnimationFrame(myReq);
+      }
+  }
+}
+toggleButton = () => {
+  if (this.state.continueAnimating === true) {
+      this.setState({continueAnimating: false});
       cancelAnimationFrame(myReq);
       clearInterval(myInt);
-    } else {
-      this.setState({ continueAnimating: true });
+  } else {
+      this.setState({continueAnimating: true});
       myReq = requestAnimationFrame((timestamp) => {myInt = setTimeout(() => {this.onAnimFrame(timestamp)}, this.state.speed)});
-    }
-    if (this.state.buttonTag === 'Start') {
-      this.setState({ buttonTag: 'Stop' });
-    } else {
-      this.setState({ buttonTag: 'Start' });
-    }
   }
+  if (this.state.buttonTag === 'Start') {
+      this.setState({buttonTag: 'Stop'});
+  } else {
+      this.setState({buttonTag: 'Start'});
+  }
+}
 
   clearGrid = () => {
     for (let i = 0; i < this.state.numY; i++) {
@@ -300,12 +302,18 @@ class Game extends Component {
     let rect = canvas.getBoundingClientRect();
 
     if (!this.state.continueAnimating) {
-      let xCoord = Number((Math.ceil((event.pageX - rect.left) / this.state.cellSize))) - 1;
-      let yCoord = Number((Math.ceil((event.pageY - rect.top - window.scrollY) / this.state.cellSize))) - 1;
-      firstMatrix[yCoord][xCoord] = firstMatrix[yCoord][xCoord] === 1 ? 0 : 1;
-      this.setState({ array1: firstMatrix });
-    }
-  }
+        let xCoord = Number((Math.ceil((event.pageX - rect.left) / this.state.cellSize))) - 1;
+        let yCoord = Number((Math.ceil((event.pageY - rect.top - window.scrollY) / this.state.cellSize))) - 1;
+        console.log("rect.left: ", rect.left);
+        console.log("rect.top: ", rect.top);
+        console.log("xCoord: ", xCoord);
+        console.log("pageX:", event.pageX);
+        console.log("yCoord: ", yCoord);
+        console.log("pageY:", event.pageY);
+        firstMatrix[yCoord][xCoord] = firstMatrix[yCoord][xCoord] === 1 ? 0 : 1;
+        this.setState({array1: firstMatrix});
+        }
+}
 
   generateRandom = () => {
     if (!this.state.continueAnimating) {
