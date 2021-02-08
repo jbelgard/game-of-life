@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "immer": "^7.0.7",
+    "react-router": "^5.2.0",
+    "react-router-dom": "^5.2.0"
+  }
+}
